@@ -1,8 +1,20 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import GUI from "lil-gui";
+import gsap from "gsap";
 
 // canvas
 const canvas = document.querySelector("canvas.webgl");
+
+// debug
+const gui = new GUI({
+  width: 300,
+  title: "Nice debug info",
+  closeFolders: false,
+});
+// gui.close();
+gui.hide();
+const debugObject = {};
 
 // cursor
 const cursor = {
@@ -21,9 +33,52 @@ const scene = new THREE.Scene();
 
 // object
 const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const material = new THREE.MeshBasicMaterial({
+  color: debugObject.color,
+  wirefarame: true,
+});
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
+
+// debug variable
+debugObject.color = "#3a6ea6";
+debugObject.spin = () => {
+  gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 });
+};
+debugObject.subdivision = 2;
+
+// debug
+const cubeTweaks = gui.addFolder("Awesome cube");
+cubeTweaks.close();
+cubeTweaks.add(mesh.position, "y").min(-3).max(3).step(0.01).name("elevation");
+cubeTweaks.add(mesh, "visible");
+cubeTweaks.add(material, "wireframe");
+cubeTweaks.addColor(debugObject, "color").onChange((value) => {
+  material.color.set(debugObject.color);
+});
+
+cubeTweaks.add(debugObject, "spin");
+cubeTweaks
+  .add(debugObject, "subdivision")
+  .min(1)
+  .max(20)
+  .step(1)
+  .onFinishChange(() => {
+    console.log("subdivision finished changing");
+    mesh.geometry.dispose();
+    mesh.geometry = new THREE.BoxGeometry(
+      1,
+      1,
+      1,
+      debugObject.subdivision,
+      debugObject.subdivision,
+      debugObject.subdivision
+    );
+  });
+
+window.addEventListener("keydown", (event) => {
+  if (event.key == "h") gui.show(gui._hidden);
+});
 
 // sizes
 const sizes = {
