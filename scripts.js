@@ -2,6 +2,14 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import GUI from "lil-gui";
 import gsap from "gsap";
+import doorColorImage from "./textures/door/color.jpg";
+import doorAlphaImage from "./textures/door/alpha.jpg";
+import doorHeightImage from "./textures/door/height.jpg";
+import doorNormalImage from "./textures/door/normal.jpg";
+import doorAmbientOcclusionImage from "./textures/door/ambientOcclusion.jpg";
+import doorMetalnessImage from "./textures/door/metalness.jpg";
+import doorRoughnessImage from "./textures/door/roughness.jpg";
+import minecraftImage from "./textures/minecraft.png";
 
 // canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -33,10 +41,65 @@ const scene = new THREE.Scene();
 
 // object
 const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+// textures
+// const image = new Image();
+const loadingManager = new THREE.LoadingManager();
+loadingManager.onStart = () => {
+  console.log("start load");
+};
+loadingManager.onLoad = () => {
+  console.log("finish load");
+};
+loadingManager.onProgress = () => {
+  console.log("progress");
+};
+loadingManager.onError = () => {
+  console.log("error");
+};
+
+const textureLoader = new THREE.TextureLoader(loadingManager);
+// const texture = textureLoader.load(
+//   doorColorImage,
+//   () => console.log("loading finish"),
+//   () => console.log("loading progress"),
+//   () => console.log("loading error")
+// );
+const colorTexture = textureLoader.load(minecraftImage);
+colorTexture.colorSpace = THREE.SRGBColorSpace;
+// colorTexture.repeat.x = 2;
+// colorTexture.repeat.y = 3;
+// colorTexture.wrapS = THREE.RepeatWrapping;
+// colorTexture.wrapT = THREE.RepeatWrapping;
+// colorTexture.wrapS = THREE.MirroredRepeatWrapping;
+// colorTexture.wrapT = THREE.MirroredRepeatWrapping;
+// colorTexture.offset.x = 0.5;
+// colorTexture.offset.y = 0.5;
+colorTexture.rotation = Math.PI * 0.25;
+colorTexture.center.x = 0.5;
+colorTexture.center.y = 0.5;
+colorTexture.generateMipmaps = false;
+colorTexture.minFilter = THREE.NearestFilter;
+colorTexture.magFilter = THREE.NearestFilter;
+
+const alphaTexture = textureLoader.load(doorAlphaImage);
+const heightTexture = textureLoader.load(doorHeightImage);
+const normalTexture = textureLoader.load(doorNormalImage);
+const ambientTexture = textureLoader.load(doorAmbientOcclusionImage);
+const metalnessTexture = textureLoader.load(doorMetalnessImage);
+const roughTexture = textureLoader.load(doorRoughnessImage);
+
+// image.addEventListener("load", () => {
+//   texture.needsUpdate = true;
+// });
+// image.src = doorColorImage;
+
 const material = new THREE.MeshBasicMaterial({
-  color: debugObject.color,
-  wirefarame: true,
+  // color: debugObject.color,
+  // wirefarame: true,
+  map: colorTexture,
 });
+
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
@@ -129,7 +192,7 @@ window.addEventListener("dblclick", () => {
 const camera = new THREE.PerspectiveCamera(
   75,
   sizes.width / sizes.height,
-  1,
+  0.01,
   1000
 );
 
